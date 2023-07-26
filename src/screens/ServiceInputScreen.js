@@ -5,17 +5,12 @@ import * as yup from "yup";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, TextInput, useTheme } from "react-native-paper";
-import { handleItemFormSubmit, updateUserProfile } from "../reducers";
+import { updateServiceProviderProfile } from "../reducers";
 import { connect } from "react-redux";
 import PrimaryButton from "../components/PrimaryButton";
 import PageHeader from "../components/PageHeader";
 import PageTitle from "../components/PageTitle";
 
-const defaultValues = {
-    name: "",
-    description: "",
-    price: "",
-};
 
 const schema = yup.object().shape({
     name: yup.string().required("Name is required"),
@@ -29,14 +24,21 @@ const schema = yup.object().shape({
 const ServiceInputForm = ({
     navigation,
     userProfile,
-    submitForm,
+    updateProfile,
 }) => {
+
+    const serviceProvided = userProfile?.service ? userProfile.service : {}
+
+    const defaultValues = {
+        ...serviceProvided, price: `${serviceProvided.price}` || ""
+    };
+
+
     const { colors } = useTheme();
     const {
         control,
         handleSubmit,
         formState: { errors, isSubmitting },
-        setValue,
     } = useForm({
         defaultValues,
         resolver: yupResolver(schema),
@@ -47,7 +49,7 @@ const ServiceInputForm = ({
             <ScrollView>
                 <View style={{ flex: 1 }}>
                     <PageHeader>
-                        <PageTitle>Service Details</PageTitle>
+                        <PageTitle>Details of offered service</PageTitle>
                     </PageHeader>
                     <View style={{ width: "90%", marginLeft: "auto", marginRight: "auto", paddingTop: 20, paddingBottom: 20, }}>
                         <Controller
@@ -60,7 +62,7 @@ const ServiceInputForm = ({
                                     onChangeText={(value) => onChange(value)}
                                     value={value}
                                     style={{
-                                        marginBottom: 10,
+                                        marginBottom: 20,
                                     }}
                                     keyboardType="default"
                                     error={errors.name ? true : false}
@@ -91,7 +93,7 @@ const ServiceInputForm = ({
                                     onChangeText={(value) => onChange(value)}
                                     value={value}
                                     style={{
-                                        marginBottom: 10,
+                                        marginBottom: 20,
                                     }}
                                     error={errors.description ? true : false}
                                 />
@@ -119,7 +121,7 @@ const ServiceInputForm = ({
                                     onChangeText={(value) => onChange(value)}
                                     value={value}
                                     style={{
-                                        marginBottom: 10,
+                                        marginBottom: 20,
                                     }}
                                     keyboardType="phone-pad"
                                     error={errors.price ? true : false}
@@ -141,7 +143,8 @@ const ServiceInputForm = ({
                         <PrimaryButton
                             disabled={isSubmitting}
                             onPress={handleSubmit(async (data) => {
-                                
+                                updateProfile(userProfile.id, { ...userProfile, service: { ...data } })
+                                Alert.alert("Success!", "Service saved successfully");
                             })}
                         >
                             Save
@@ -161,8 +164,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        submitForm: (url, data) => {
-            dispatch(handleItemFormSubmit(url, data));
+        updateProfile: (url, data) => {
+            dispatch(updateServiceProviderProfile(url, data));
         },
     };
 };

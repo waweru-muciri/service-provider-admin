@@ -3,15 +3,12 @@ import { StyleSheet } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import AppointmentsScreen from '../screens/AppointmentsScreen';
-import AppointmentInputScreen from '../screens/AppointmentInputScreen';
-import HomeScreen from '../screens/HomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import { AppStyles } from '../AppStyles';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import ServicesScreen from '../screens/ServicesScreen';
 import AccountProfileScreen from '../screens/AccountProfileScreen';
 import ServiceInputScreen from '../screens/ServiceInputScreen';
 
@@ -56,9 +53,8 @@ const HomeStack = () => (
     tabBarActiveTintColor: 'tomato',
     tabBarInactiveTintColor: 'gray',
   })}>
-    {/* <Tab.Screen name="Home" component={HomeScreen} /> */}
     <Tab.Screen name="Appointments" component={AppointmentsScreen} />
-    <Tab.Screen name="Services" component={ServicesScreen} />
+    <Tab.Screen name="Services" component={ServiceInputScreen} />
     <Tab.Screen name="Account" component={AccountProfileScreen} />
   </Tab.Navigator >
 );

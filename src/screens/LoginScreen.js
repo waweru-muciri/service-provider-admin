@@ -40,9 +40,9 @@ function LoginScreen({ navigation }) {
         AsyncStorage.setItem('@loggedInUserID:key', trimmedEmail);
         AsyncStorage.setItem('@loggedInUserID:password', trimmedPassword);
         //get user profile stored in firestore 
-        getDoc(doc(db, "users", user.uid))
+        getDoc(doc(db, "service-providers", user.uid))
           .then(async docSnapshot => {
-            const userProfile = docSnapshot.data()
+            const userProfile = {...docSnapshot.data(), id: user_uid}
             dispatch(login(userProfile));
             dispatch(setUserProfile(userProfile));
           }).catch(error => console.log(error))

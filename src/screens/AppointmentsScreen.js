@@ -1,13 +1,13 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { fetchDataFromUrl } from '../reducers';
+import { getAppointmentsForServiceProvider } from '../reducers';
 import { List } from 'react-native-paper';
 import { ScrollView } from 'react-native-gesture-handler';
 import { View } from 'react-native';
 import PageTitle from '../components/PageTitle';
 import PageHeader from '../components/PageHeader';
 
-function AppointmentsScreen({ navigation, fetchData, appointments }) {
+function AppointmentsScreen({ navigation, fetchAppointments, appointments }) {
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -16,7 +16,7 @@ function AppointmentsScreen({ navigation, fetchData, appointments }) {
     }, []);
 
     useEffect(() => {
-        fetchData("appointments")
+        fetchAppointments()
     }, [])
 
 
@@ -24,7 +24,7 @@ function AppointmentsScreen({ navigation, fetchData, appointments }) {
         <ScrollView>
             <View style={{ flex: 1 }}>
                 <PageHeader>
-                    <PageTitle>Your appointments</PageTitle>
+                    <PageTitle>Your scheduled appointments</PageTitle>
                 </PageHeader>
                 <View style={{ width: "90%", marginLeft: "auto", marginRight: "auto", paddingTop: 20, paddingBottom: 20, }}>
                     <View style={{ flex: 1 }}>
@@ -36,11 +36,6 @@ function AppointmentsScreen({ navigation, fetchData, appointments }) {
                                         title={appointment?.title}
                                         description={appointment?.description}
                                         left={(props) => <List.Icon {...props} icon="calendar-today" />}
-                                        onPress={() => {
-                                            navigation.navigate("AppointmentInputScreen", {
-                                                appointmentId: appointment.id
-                                            })
-                                        }}
                                     />))
                             }
                         </List.Section>
@@ -60,8 +55,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        fetchData: (url) => {
-            dispatch(fetchDataFromUrl(url))
+        fetchAppointments: (url) => {
+            dispatch(getAppointmentsForServiceProvider())
         },
     }
 }

@@ -40,9 +40,9 @@ function WelcomeScreen({ navigation }) {
           // Signed in 
           const user = userCredential.user;
           //get user profile stored in firestore 
-          getDoc(doc(db, "users", user.uid))
+          getDoc(doc(db, "service-providers", user.uid))
             .then(docSnapshot => {
-              const userProfile = docSnapshot.data()
+              const userProfile = {...docSnapshot.data(), id: user.uid}
               dispatch(login(userProfile));
               dispatch(setUserProfile(userProfile));
               setIsLoading(false);

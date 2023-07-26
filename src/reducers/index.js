@@ -45,24 +45,26 @@ function auth(state = initialAuthState, action) {
   }
 }
 
-export function updateUserProfile(userId, userData) {
+export function updateServiceProviderProfile(userId, userData) {
   return async (dispatch) => {
     //send post request to edit the item
-    updateDoc(doc(db, "users", userId), userData)
+    updateDoc(doc(db, "service-providers", userId), userData)
       .then((docRef) => {
         let modifiedObject = Object.assign(
           {},
-          data,
+          userData,
         );
         dispatch(setUserProfile(modifiedObject));
       })
   }
 }
 
-export function getServices() {
+export function getAppointmentsForServiceProvider() {
   return async (dispatch) => {
     try {
-      const snapshot = await getDocs(collection(db, "service-providers"))
+      const serviceProviderId = AsyncStorage.getItem('@loggedInUserID:_id');
+      const snapshot = await getDocs(collection(db, "appointments"))
+
       const fetchedItems = snapshot.docs.map((doc) => {
         const fetchedObject = Object.assign({}, doc.data(),
           {
@@ -71,14 +73,13 @@ export function getServices() {
         );
         return fetchedObject;
       });
-      switch (url) {
-        case "service-providers":
-          dispatch(servicesFetchDataSuccess(fetchedItems));
-          break;
-      }
+
+      const appointmentsForUser = fetchedItems.filter(fetchedItem => fetchedItem.service_provider == serviceProviderId)
+
+      dispatch(servicesFetchDataSuccess(appointmentsForUser));
     } catch (error) {
-    }
   }
+}
 }
 
 
@@ -109,54 +110,6 @@ export async function uploadImageAsync(uri) {
   return await getDownloadURL(fileRef);
 }
 
-
-export function handleItemFormSubmit(data, url) {
-  if (typeof data._id === "undefined") {
-    delete data._id;
-  }
-  return async (dispatch) => {
-    const user_id = await AsyncStorage.getItem("@loggedInUserID:_id")
-    const isUserServiceProvider = await AsyncStorage.getItem("@loggedInUserID:isUserServiceProvider")
-    typeof data._id !== "undefined"
-      ? //send post request to edit the item
-      updateDoc(isUserServiceProvider ? doc(db, "service-providers", user_id, url, data._id) : doc(db, "users", user_id, url, data._id), data)
-        .then((docRef) => {
-          let modifiedObject = Object.assign(
-            {},
-            data,
-          );
-          switch (url) {
-            case "appointments":
-              dispatch(editAppointment(modifiedObject));
-              break;
-            case "service-providers":
-              dispatch(editService(modifiedObject));
-              break;
-          }
-        })
-        .catch((error) => {
-          console.log("Error updating document => ", error.response);
-        }).finally(() => {
-        })
-      : //send post to create item
-      addDoc(url == "service-providers" ? collection(db, "service-providers") : collection(db, "users", user_id, url), data)
-        .then((docRef) => {
-          let addedItem = Object.assign({}, data, {
-            _id: docRef._id,
-          });
-          switch (url) {
-            case "appointments":
-              dispatch(addAppointment(addedItem));
-              break;
-          }
-
-        })
-        .catch((error) => {
-          console.log("Error adding document => ", error.response);
-        }).finally(() => {
-        });
-  }
-}
 
 
 export function fetchDataFromUrl(url) {
