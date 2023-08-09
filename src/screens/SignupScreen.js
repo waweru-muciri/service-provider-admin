@@ -21,10 +21,12 @@ function SignupScreen({ navigation }) {
   const dispatch = useDispatch();
 
   const onRegister = () => {
-    createUserWithEmailAndPassword(auth, email, password)
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    createUserWithEmailAndPassword(auth, trimmedEmail, trimmedPassword)
       .then((userCredential) => {
         const data = {
-          email: email,
+          email: trimmedEmail,
           first_name: first_name,
           last_name: last_name,
           phone_number: phone_number,
@@ -34,13 +36,14 @@ function SignupScreen({ navigation }) {
         const user_uid = user.uid;
         //persist user data to async storage
         AsyncStorage.setItem('@loggedInUserID:id', user_uid);
-        AsyncStorage.setItem('@loggedInUserID:key', email);
-        AsyncStorage.setItem('@loggedInUserID:password', password);
+        AsyncStorage.setItem('@loggedInUserID:key', trimmedEmail);
+        AsyncStorage.setItem('@loggedInUserID:password', trimmedPassword);
         //persist user details into firestore
-        setDoc(doc(db, "service-providers", user_uid), { ...data, id: user_uid })
+        const userDetailsToSave = { ...data, id: user_uid }
+        setDoc(doc(db, "service-providers", user_uid), userDetailsToSave)
           .then(() => {
-            dispatch(login(user));
-            dispatch(setUserProfile(user));
+            dispatch(login(userDetailsToSave));
+            dispatch(setUserProfile(userDetailsToSave));
             navigation.navigate('HomeStack');
           })
           .catch(({ code, message }) => Alert.alert(message))
