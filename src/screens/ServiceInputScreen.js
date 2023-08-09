@@ -1,15 +1,16 @@
-import { View, Text, ScrollView, Alert } from "react-native";
-import React, { useLayoutEffect } from "react";
+import { View, Text, ScrollView, Alert, Image } from "react-native";
+import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as yup from "yup";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, TextInput, useTheme } from "react-native-paper";
-import { updateServiceProviderProfile } from "../reducers";
+import { updateServiceProviderProfile, uploadImageAsync } from "../reducers";
 import { connect } from "react-redux";
 import PrimaryButton from "../components/PrimaryButton";
 import PageHeader from "../components/PageHeader";
 import PageTitle from "../components/PageTitle";
+import * as ImagePicker from 'expo-image-picker';
 
 
 const schema = yup.object().shape({
@@ -28,6 +29,7 @@ const ServiceInputForm = ({
 }) => {
 
     const serviceProvided = userProfile?.service ? userProfile.service : {}
+    const [serviceImage, setserviceImage] = useState(null);
 
     const defaultValues = {
         ...serviceProvided, price: `${serviceProvided.price}` || ""
@@ -140,11 +142,42 @@ const ServiceInputForm = ({
                                 {errors.price.message}
                             </Text>
                         )}
+                        {serviceImage && <Image source={{ uri: serviceImage }} style={{ width: "100%", height: 200, marginBottom: 20 }} />}
+                        <Button
+                            mode="outlined"
+                            icon={"camera"}
+                            onPress={async () => {
+                                // No permissions request is necessary for launching the image library
+                                let result = await ImagePicker.launchImageLibraryAsync({
+                                    selectionLimit: 1,
+                                    mediaTypes: ImagePicker.MediaTypeOptions.All,
+                                    allowsEditing: true,
+                                    aspect: [4, 3],
+                                    quality: 1,
+                                });
+
+
+                                if (!result.canceled) {
+                                    setserviceImage(result.assets[0].uri);
+                                }
+                            }}
+                        >
+                            Pick Service Image
+                        </Button>
                         <PrimaryButton
+                            style={{ marginTop: 40 }}
                             disabled={isSubmitting}
                             onPress={handleSubmit(async (data) => {
-                                updateProfile(userProfile.id, { ...userProfile, service: { ...data } })
-                                Alert.alert("Success!", "Service saved successfully");
+                                try {
+                                    let serviceImageUrl;
+                                    if (serviceImage) {
+                                        serviceImageUrl = await uploadImageAsync(serviceImage);
+                                    }
+                                    updateProfile(userProfile.id, { ...userProfile, service: { ...data, image_url: serviceImageUrl } })
+                                    Alert.alert("Success!", "Service saved successfully");
+                                } catch (error) {
+                                    console.error(error);
+                                }
                             })}
                         >
                             Save
@@ -152,7 +185,7 @@ const ServiceInputForm = ({
                     </View>
                 </View>
             </ScrollView>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 };
 

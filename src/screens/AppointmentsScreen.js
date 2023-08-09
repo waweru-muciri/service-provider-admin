@@ -47,6 +47,7 @@ function AppointmentsScreen({ navigation, fetchAppointments, appointments }) {
 }
 
 const mapStateToProps = (state) => {
+
     return {
         user: state.user,
         appointments: state.appointments,

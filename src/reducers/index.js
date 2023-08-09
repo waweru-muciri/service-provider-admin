@@ -35,7 +35,7 @@ function auth(state = initialAuthState, action) {
       return { ...state, userProfile: action.userProfile };
     case LOGOUT:
       return async () => {
-        await AsyncStorage.removeItem('@loggedInUserID:_id');
+        await AsyncStorage.removeItem('@loggedInUserID:id');
         await AsyncStorage.removeItem('@loggedInUserID:key');
         await AsyncStorage.removeItem('@loggedInUserID:password');
         return { ...state, isLoggedIn: false, user: {}, userProfile: {} };
@@ -62,21 +62,21 @@ export function updateServiceProviderProfile(userId, userData) {
 export function getAppointmentsForServiceProvider() {
   return async (dispatch) => {
     try {
-      const serviceProviderId = AsyncStorage.getItem('@loggedInUserID:_id');
+      const serviceProviderId = await AsyncStorage.getItem('@loggedInUserID:id');
       const snapshot = await getDocs(collection(db, "appointments"))
 
       const fetchedItems = snapshot.docs.map((doc) => {
         const fetchedObject = Object.assign({}, doc.data(),
           {
-            _id: doc._id,
+            id: doc.id,
           }
-        );
-        return fetchedObject;
-      });
+          );
+          return fetchedObject;
+        });
+        
+        const appointmentsForUser = fetchedItems.filter(fetchedItem => fetchedItem.service_provider == serviceProviderId)
 
-      const appointmentsForUser = fetchedItems.filter(fetchedItem => fetchedItem.service_provider == serviceProviderId)
-
-      dispatch(servicesFetchDataSuccess(appointmentsForUser));
+      dispatch(appointmentsFetchDataSuccess(appointmentsForUser));
     } catch (error) {
   }
 }
@@ -115,7 +115,7 @@ export async function uploadImageAsync(uri) {
 export function fetchDataFromUrl(url) {
   return async (dispatch) => {
     try {
-      const user_id = await AsyncStorage.getItem("@loggedInUserID:_id")
+      const user_id = await AsyncStorage.getItem("@loggedInUserID:id")
       let urlToFetchFrom;
       if (url == "service-providers") {
         urlToFetchFrom = "service-providers"
@@ -130,7 +130,7 @@ export function fetchDataFromUrl(url) {
       const fetchedItems = snapshot.docs.map((doc) => {
         const fetchedObject = Object.assign({}, doc.data(),
           {
-            _id: doc._id,
+            id: doc.id,
           }
         );
         return fetchedObject;
@@ -152,7 +152,7 @@ export function handleDelete(itemId, url) {
   //send request to server to delete selected item
   return async (dispatch) => {
     try {
-      const user_id = await AsyncStorage.getItem("@loggedInUserID:_id")
+      const user_id = await AsyncStorage.getItem("@loggedInUserID:id")
       await deleteDoc(doc(db, "users", user_id, url, itemId))
       switch (url) {
         case "appointments":
